@@ -1,0 +1,16 @@
+# Append under the top-level `flavorizr:` key in pubspec.yaml (sibling to
+# `flutter:`, `dependencies:`, etc — NOT nested inside another key).
+# Requires the flutter_flavorizr dev_dependency (see references/ios-flavors.md).
+#
+# One entry per flavor. `app.name` becomes the Android resValue app_name /
+# iOS DISPLAY_NAME. `android.applicationId` / `ios.bundleId` become the
+# per-flavor package name / bundle identifier — give each flavor a distinct
+# one (commonly base id + ".dev" / ".stage", prod keeps the bare base id).
+flavorizr:
+  app:
+    android:
+      flavorDimensions: "flavor-type"
+    ios: {}
+
+  flavors:
+{{FLAVOR_BLOCKS}}
