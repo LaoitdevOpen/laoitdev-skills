@@ -114,10 +114,10 @@ export const yourFeatureService = {
 ```
 
 ### `hooks/` — one file per operation
-Thin wrappers around TanStack Query. See `frontend-tanstack-query` skill for full patterns.
+Thin wrappers around TanStack Query. See `tanstack-query` skill for full patterns.
 
 ### `schemas/your-feature.schema.ts`
-Zod schemas used for both route search validation and form validation. Functions that accept `t: TFunction` for translated error messages. See `frontend-tanstack-form` skill.
+Zod schemas used for both route search validation and form validation. Functions that accept `t: TFunction` for translated error messages. See `tanstack-form` skill.
 
 ### `components/index.ts`
 Named re-exports only — makes imports clean from route files.

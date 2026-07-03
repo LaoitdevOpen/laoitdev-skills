@@ -5,6 +5,11 @@ description: "Core frontend coding standards for React + TypeScript projects usi
 
 # Frontend Coding Standards
 
+## Core Invariants (always enforced — never violate)
+
+- Always use `useTranslation()` for user-visible strings — never hardcode them.
+- Use named exports, not default exports, for everything except route components.
+
 ## Tech Stack
 
 | Concern | Library |
@@ -118,4 +123,4 @@ Prefer shared components over re-implementing:
 - `InfoRow` — label/value pair inside SectionCard
 - `OrganizationFilter` — org hierarchy filter UI
 - `ConfirmDialog` / `useConfirmDialog` — confirmation modals
-- Form components via `useAppForm` (see frontend-tanstack-form skill)
+- Form components via `useAppForm` (see tanstack-form skill)

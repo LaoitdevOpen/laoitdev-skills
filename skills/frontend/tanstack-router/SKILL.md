@@ -5,6 +5,10 @@ description: "How to use TanStack Router for file-based routing. Use this whenev
 
 # Routing with TanStack Router
 
+## Core Invariants (always enforced — never violate)
+
+- Never manually edit `src/routeTree.gen.ts` — it is auto-generated; commit it, don't hand-edit it.
+
 ## References
 
 Read the relevant file when you need it:

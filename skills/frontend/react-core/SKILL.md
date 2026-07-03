@@ -7,6 +7,10 @@ description: "How to implement the src/core folder — app-level infrastructure 
 
 `src/core/` contains app-level infrastructure that every feature depends on but no single feature owns. Nothing in `core/` should import from `features/`.
 
+## Core Invariants (always enforced — never violate)
+
+- Nothing in `core/` may import from `features/`.
+
 ## References
 
 Read the relevant file when you need it:
