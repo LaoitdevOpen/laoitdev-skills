@@ -10,6 +10,7 @@ description: "Core frontend coding standards for React + TypeScript projects usi
 | Concern | Library |
 |---|---|
 | UI | MUI v9 (Material UI) |
+| Tables | `material-react-table` v3 (via shared `DataTable` wrapper) |
 | Styling engine | `@emotion/react` + `@emotion/styled` (required MUI peer deps) |
 | Routing | TanStack Router (file-based) |
 | Data fetching | TanStack Query v5 |

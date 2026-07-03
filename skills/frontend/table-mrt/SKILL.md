@@ -19,14 +19,13 @@ import type { MRT_ColumnDef, MRT_RowSelectionState } from 'material-react-table'
 ```tsx
 interface FeatureListProps {
   searchParams: FeatureFilterParams
-  data?: Feature[]
-  total?: number
-  isLoading?: boolean
+  onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
 }
 
-export function FeatureList({ searchParams, data = [], total = 0, isLoading }: FeatureListProps) {
+export function FeatureList({ searchParams, onPageChange, onPageSizeChange }: FeatureListProps) {
   const { t } = useTranslation()
-  const navigate = useNavigate({ from: '/your-section/your-feature/' })
+  const { data, isLoading, isError } = useFeatures(searchParams)
 
   const columns = useMemo<MRT_ColumnDef<Feature>[]>(() => [
     {
@@ -50,13 +49,14 @@ export function FeatureList({ searchParams, data = [], total = 0, isLoading }: F
   return (
     <DataTable
       columns={columns}
-      data={data}
-      rowCount={total}
+      data={data?.items || []}
+      rowCount={data?.total || 0}
       isLoading={isLoading}
-      page={searchParams.page || 1}
-      pageSize={searchParams.page_size || 20}
-      onPageChange={(newPage) => navigate({ search: (prev) => ({ ...prev, page: newPage }) })}
-      onPageSizeChange={(newPageSize) => navigate({ search: (prev) => ({ ...prev, page_size: newPageSize, page: 1 }) })}
+      isError={isError}
+      page={searchParams.page}
+      pageSize={searchParams.page_size}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
     />
   )
 }
@@ -103,7 +103,59 @@ const columns = useMemo<MRT_ColumnDef<Feature>[]>(() => [
 ], [t])
 ```
 
+### Extracting Columns for Larger Tables
+
+Once a table has more than a handful of columns, extract column definitions into a dedicated hook:
+
+- File: `components/{Feature}Columns.tsx`
+- Hook: `use{Feature}Columns()`
+
+```tsx
+// components/FeatureColumns.tsx
+export function useFeatureColumns() {
+  const { t } = useTranslation()
+  return useMemo<MRT_ColumnDef<Feature>[]>(() => [
+    // column defs...
+  ], [t])
+}
+
+// components/FeatureList.tsx
+const columns = useFeatureColumns()
+```
+
+## Loading and Error States
+
+Pass query state directly to `DataTable`:
+
+- `isLoading` — drives MRT's built-in progress bar and loading skeleton. No separate skeleton component is needed.
+- `isError` — drives MRT's alert banner (`showAlertBanner`).
+
+```tsx
+const { data, isLoading, isError } = useFeatures(searchParams)
+
+<DataTable
+  // ...
+  isLoading={isLoading}
+  isError={isError}
+/>
+```
+
+## Disabled MRT Features
+
+The `DataTable` wrapper hard-disables these MRT features globally:
+
+- `enableColumnActions`
+- `enableColumnFilters`
+- `enableSorting`
+- `enableDensityToggle`
+- `enableFullScreenToggle`
+- `enableHiding`
+
+Column-level overrides (e.g. `enableSorting: true` on a column def) have no effect. Filtering and sorting belong in the page-level filter form and API query params, not in the table itself.
+
 ## Row Actions Menu
+
+When `enableRowActions` is enabled, the actions column is automatically pinned to the right (`enableColumnPinning` defaults to `true`).
 
 Define `RowActionMenu` as a component inside `renderRowActions` to use hooks (like `useState`):
 
@@ -157,6 +209,10 @@ Define `RowActionMenu` as a component inside `renderRowActions` to use hooks (li
 
 ## Row Selection for Batch Operations
 
+When `enableRowSelection` is enabled, the select checkbox column is automatically pinned to the left.
+
+The top toolbar row only renders when `renderTopToolbarCustomActions` is provided (`enableTopToolbar={!!renderTopToolbarCustomActions}`).
+
 ```tsx
 const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({})
 
@@ -198,7 +254,8 @@ const selectedItems = useMemo(() => {
 | `columns` | `MRT_ColumnDef<T>[]` | required | Column definitions |
 | `data` | `T[]` | required | Row data |
 | `rowCount` | `number` | `0` | Total rows (for server pagination) |
-| `isLoading` | `boolean` | `false` | Skeleton loading state |
+| `isLoading` | `boolean` | `false` | Loading state (progress bar + skeleton) |
+| `isError` | `boolean` | `false` | Error state (alert banner) |
 | `page` | `number` | `1` | Current page (1-indexed) |
 | `pageSize` | `number` | `10` | Rows per page |
 | `onPageChange` | `(p: number) => void` | — | Called on page change |
@@ -206,11 +263,14 @@ const selectedItems = useMemo(() => {
 | `enableRowActions` | `boolean` | `false` | Show actions column |
 | `renderRowActions` | `fn` | — | Action cell renderer |
 | `positionActionsColumn` | `'first' \| 'last'` | `'last'` | Actions column position |
+| `actionsColumnSize` | `number` | `80` | Width of the actions column |
 | `enableRowSelection` | `boolean \| fn` | `false` | Enable row checkboxes |
 | `getRowId` | `(row: T) => string` | — | Required when using row selection |
 | `rowSelection` | `Record<string, boolean>` | — | Controlled selection state |
 | `onRowSelectionChange` | `fn` | — | Selection change handler |
-| `renderTopToolbarCustomActions` | `fn` | — | Custom toolbar content |
+| `renderTopToolbarCustomActions` | `fn` | — | Custom toolbar content (also controls toolbar visibility) |
+| `enableColumnPinning` | `boolean` | `true` | Pin select column left, actions column right |
+| `muiTableBodyRowProps` | `fn \| object` | — | Override default row styling |
 
 ## Pagination
 
