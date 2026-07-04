@@ -1,0 +1,13 @@
+{
+  "name": "laoitdev-skills",
+  "description": "Curated agent skills for frontend, backend, and mobile conventions and workflows.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Laoitdev"
+  },
+  "homepage": "https://github.com/LaoitdevOpen/laoitdev-skills",
+  "repository": "https://github.com/LaoitdevOpen/laoitdev-skills",
+  "license": "MIT",
+  "keywords": ["skills", "frontend", "backend", "mobile", "react", "flutter", "typescript"],
+  "skills": ["./skills/frontend", "./skills/backend", "./skills/mobile"]
+}

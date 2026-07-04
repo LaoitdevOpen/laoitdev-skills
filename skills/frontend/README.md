@@ -12,3 +12,5 @@ Conventions and workflows for React + TypeScript frontend development.
 | [`tanstack-form`](tanstack-form/SKILL.md) | Creating or modifying any form (create/update/filter/modal) with TanStack Form v1's `useAppForm` hook and `App*` field components. |
 | [`table-mrt`](table-mrt/SKILL.md) | Creating a list/table view for a feature using the `DataTable` (Material React Table) wrapper — columns, pagination, row actions, selection, toolbar. |
 | [`mui-theme`](mui-theme/SKILL.md) | Working with colors, spacing, typography, component styling, theme overrides, or shared UI building blocks like `SectionCard`/`InfoRow`. |
+| [`frontend-i18n`](frontend-i18n/SKILL.md) | Writing any user-visible string, building form validation messages, handling API/business errors, or adding new translation keys. |
+| [`frontend-audit`](frontend-audit/SKILL.md) | Auditing a component, feature, or the whole project against these skills — architecture, forms, tables, queries, routing, coding standards, and i18n compliance. |

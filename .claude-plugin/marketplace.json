@@ -1,0 +1,20 @@
+{
+  "name": "laoitdev-skills",
+  "owner": {
+    "name": "Laoitdev"
+  },
+  "description": "Curated collection of Agent Skills for Claude Code — frontend, backend, and mobile conventions and workflows.",
+  "plugins": [
+    {
+      "name": "laoitdev-skills",
+      "source": "./",
+      "description": "Curated agent skills for frontend, backend, and mobile conventions and workflows.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Laoitdev"
+      },
+      "license": "MIT",
+      "keywords": ["skills", "frontend", "backend", "mobile", "react", "flutter", "typescript"]
+    }
+  ]
+}
