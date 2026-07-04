@@ -92,6 +92,11 @@ Read `mui-theme`. Check:
 - Colors use `theme.palette` tokens, not hardcoded hex
 - `SectionCard` and `InfoRow` used for detail/info layouts
 - Dark mode not broken (no hardcoded colors that don't invert)
+- MUI Grid uses `size` prop — flag as **Warning** if code uses legacy syntax:
+  - `xs`/`sm`/`md`/`lg`/`xl` props directly on `<Grid>`
+  - `item` prop on `<Grid>`
+  - `Grid2` import from `@mui/material/Grid2`
+  - Fix: replace with `size={{ ... }}`. See: `react-standard` skill.
 
 #### Forms
 Read `tanstack-form`. Check:
@@ -178,6 +183,12 @@ Group findings by category. For each:
 > **[Category] · [Severity]**  
 > `path/to/file.tsx` — Description of the issue.  
 > Fix: What to do instead. See: `skill-name` skill.
+
+Example:
+
+> **[Theme & UI] · Warning**  
+> `FeatureDetail.tsx` — Uses `<Grid xs={12} md={6}>` instead of the `size` prop.  
+> Fix: Replace with `<Grid size={{ xs: 12, md: 6 }}>`. See: `react-standard` skill.
 
 ### Suggestions
 Any improvements that aren't violations — patterns the developer could adopt to make this code more consistent or maintainable. Reference the relevant skill.

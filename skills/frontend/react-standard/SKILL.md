@@ -11,6 +11,7 @@ description: "Core frontend coding standards for React + TypeScript projects usi
 - Use named exports, not default exports, for everything except route components.
 - **Route files live only in `src/routes/`** — never create route files inside `features/`.
 - **Use `bun` for all package installation** — never `npm`, `yarn`, or `pnpm`.
+- **Use MUI Grid `size` prop for column sizing** — never `xs`/`sm`/`md`/`lg`/`xl` props directly on Grid.
 
 ## Package Manager
 
@@ -127,9 +128,34 @@ interface ElectricityListProps {
 
 - Use `sx` prop for one-off styles; avoid inline `style`.
 - Prefer MUI responsive breakpoints: `{ xs: ..., sm: ..., md: ... }`.
-- Use MUI `Grid` with `size={{ xs: 12, md: 6 }}` (v9 unified Grid — no separate Grid2 import needed).
 - Use `elevation={0}` with `border` on Cards for flat design.
 - Use `Container maxWidth="xl"` for page-level containers.
+
+### MUI Grid
+
+**MUI Grid must use the `size` prop.** Never put breakpoint props directly on `<Grid>` (`xs`, `sm`, `md`, `lg`, `xl`). Never use the legacy `item` prop or import `Grid2`.
+
+Import from `@mui/material` — MUI v9 unified Grid, no separate `Grid2` import:
+
+```tsx
+import { Grid } from '@mui/material'
+```
+
+| Wrong | Correct |
+|---|---|
+| `<Grid xs={12} md={6}>` | `<Grid size={{ xs: 12, md: 6 }}>` |
+| `<Grid item xs={12} md={6}>` | `<Grid size={{ xs: 12, md: 6 }}>` |
+| `import Grid2 from '@mui/material/Grid2'` | `import { Grid } from '@mui/material'` |
+| `<Grid md={10}>` | `<Grid size={{ md: 10 }}>` or `<Grid size={10}>` |
+
+Container rows stay unchanged:
+
+```tsx
+<Grid container spacing={3}>
+  <Grid size={{ xs: 12, md: 6 }}>...</Grid>
+  <Grid size={12}>...</Grid>
+</Grid>
+```
 
 ## Shared Components
 
@@ -139,4 +165,4 @@ Prefer shared components over re-implementing:
 - `InfoRow` — label/value pair inside SectionCard
 - `OrganizationFilter` — org hierarchy filter UI
 - `ConfirmDialog` / `useConfirmDialog` — confirmation modals
-- Form components via `useAppForm` (see frontend-tanstack-form skill)
+- Form components via `useAppForm` (see tanstack-form skill)

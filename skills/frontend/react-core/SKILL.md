@@ -28,8 +28,10 @@ src/core/
 ├── config/
 │   ├── i18n.config.ts         # i18next init — import side-effect in main.tsx
 │   ├── query-client.config.ts # QueryClient singleton with default options
-│   ├── router.config.ts       # createRouter + Register declaration
 │   └── theme.config.ts        # createAppTheme(mode) factory
+├── router/
+│   ├── index.tsx              # createRouter + Register declaration
+│   └── routeTree.gen.ts       # auto-generated — never edit manually
 ├── context/
 │   ├── AuthContext.tsx         # user state, login(), logout()
 │   ├── SnackbarContext.tsx     # showSuccess/Error/Warning/Info
@@ -101,24 +103,30 @@ export const queryClient = new QueryClient({
 
 ---
 
-## `core/config/router.config.ts`
+## `core/router/index.tsx`
+
+Route tree generation config → see `tanstack-router` skill.
 
 ```ts
-import { createRouter } from '@tanstack/react-router'
-import { routeTree } from '@/routeTree.gen'
+import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
+import { queryClient } from '@/core/config/query-client.config'
+import type { RouterContext } from '@/routes/__root'
 
-export const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-  context: {
-    queryClient,
-    user: undefined,
-  } as RouterContext,
-})
+export function createRouter() {
+  return createTanStackRouter({
+    routeTree,
+    defaultPreload: 'intent',
+    scrollRestoration: true,
+    context: {
+      queryClient,
+      user: undefined,
+    } as RouterContext,
+  })
+}
 
 declare module '@tanstack/react-router' {
-  interface Register { router: typeof router }
+  interface Register { router: ReturnType<typeof createRouter> }
 }
 ```
 
@@ -167,9 +175,11 @@ import { ThemeProvider } from '@/core/context/ThemeContext'
 import { AuthProvider } from '@/core/context/AuthContext'
 import { SnackbarProvider } from '@/core/context/SnackbarContext'
 import { queryClient } from '@/core/config/query-client.config'
-import { router } from '@/core/config/router.config'
+import { createRouter } from '@/core/router'
 import '@/core/config/i18n.config'   // side-effect — init i18next before first render
 import './index.css'
+
+const router = createRouter()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

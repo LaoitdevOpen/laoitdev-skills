@@ -7,7 +7,7 @@ description: "How to use TanStack Router for file-based routing. Use this whenev
 
 ## Core Invariants (always enforced — never violate)
 
-- Never manually edit `src/routeTree.gen.ts` — it is auto-generated; commit it, don't hand-edit it.
+- Never manually edit `routeTree.gen.ts` — it is auto-generated; commit it, don't hand-edit it.
 - **Routes are global** — all route files live in `src/routes/`. Never create route files inside feature folders.
 - **Search schemas never inline in route files** — always import them from `features/[feature]/schemas/[feature].schema.ts`.
 - Inside a route component, always use `Route.useSearch()`, `Route.useNavigate()`, and `Route.useParams()` — never the bare hooks without `from`.
@@ -23,9 +23,27 @@ Read the relevant file when you need it:
 
 ## Route Tree Generation
 
-`src/routeTree.gen.ts` is auto-generated — never edit it manually. Commit it to git so TypeScript can type-check in CI without running the dev server.
+### Overview
 
-### Vite plugin (recommended)
+- `routeTree.gen.ts` lives at `src/core/router/routeTree.gen.ts` — co-located with router setup in `core/`
+- Generated automatically on `npm run dev` by the Vite plugin; regenerated when files in `src/routes/` change
+- Commit it to git so `tsc` and CI type-check without running the dev server
+
+### `tsr.config.json` (project root)
+
+Shared config for both the Vite plugin and CLI:
+
+```json
+{
+  "routesDirectory": "./src/routes",
+  "generatedRouteTree": "./src/core/router/routeTree.gen.ts",
+  "autoCodeSplitting": true
+}
+```
+
+The Vite plugin reads this file automatically from the project cwd. Inline `tanstackRouter({...})` options override file values when both are set.
+
+### Vite plugin (dev — must come before `react()`)
 
 ```ts
 // vite.config.ts
@@ -35,7 +53,12 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }), // must come before react()
+    tanstackRouter({
+      target: 'react',
+      routesDirectory: './src/routes',
+      generatedRouteTree: './src/core/router/routeTree.gen.ts',
+      autoCodeSplitting: true,
+    }),
     react(),
   ],
 })
@@ -43,12 +66,32 @@ export default defineConfig({
 
 > `TanStackRouterVite` is a deprecated alias — prefer `tanstackRouter`.
 
-### CLI (CI / without dev server)
+On `npm run dev`, the plugin generates the route tree on startup and watches `src/routes/` for changes.
+
+### `package.json` scripts and devDependencies
+
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "gen-route": "tsr generate",
+    "build": "npm run gen-route && tsc && vite build",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.48.0",
+    "@tanstack/router-cli": "^1.48.0"
+  }
+}
+```
+
+Run `gen-route` before `type-check` in CI if `routeTree.gen.ts` is missing. Requires `@tanstack/router-cli`.
+
+CLI commands (via `gen-route` script or directly):
 
 ```bash
-bun add -d @tanstack/router-cli
-bunx tsr generate   # one-shot before build/type-check
-bunx tsr watch      # continuous watch
+npm run gen-route   # one-shot — use in build/CI
+npx tsr watch       # continuous watch without dev server
 ```
 
 ### Plugin config options
@@ -57,13 +100,17 @@ bunx tsr watch      # continuous watch
 tanstackRouter({
   target: 'react',
   routesDirectory: './src/routes',
-  generatedRouteTree: './src/routeTree.gen.ts',
+  generatedRouteTree: './src/core/router/routeTree.gen.ts',
   autoCodeSplitting: true,
   routeFileIgnorePrefix: '-',
   quoteStyle: 'single',
   semicolons: false,
 })
 ```
+
+### Troubleshooting
+
+If generation fails on dev or build, check route files in `src/routes/` for JSX/TS syntax errors — the generator parses every route file and errors block output.
 
 ---
 
@@ -292,24 +339,26 @@ const page = useSearch({ from: '/_layout/section/feature/', select: (s) => s.pag
 ## Router Config
 
 ```ts
-// core/config/router.config.ts
-import { createRouter } from '@tanstack/react-router'
-import { routeTree } from '@/routeTree.gen'
-import { queryClient } from './query-client.config'
+// src/core/router/index.tsx
+import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
+import { queryClient } from '@/core/config/query-client.config'
 import type { RouterContext } from '@/routes/__root'
 
-export const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-  context: {
-    queryClient,
-    user: undefined,
-  } as RouterContext,
-})
+export function createRouter() {
+  return createTanStackRouter({
+    routeTree,
+    defaultPreload: 'intent',
+    scrollRestoration: true,
+    context: {
+      queryClient,
+      user: undefined,
+    } as RouterContext,
+  })
+}
 
 declare module '@tanstack/react-router' {
-  interface Register { router: typeof router }
+  interface Register { router: ReturnType<typeof createRouter> }
 }
 ```
 
