@@ -1,11 +1,28 @@
 ---
 name: feature-architecture
-description: "Feature folder structure and architecture for React + TypeScript admin apps. Use this when creating a new feature, adding a major section, or when asked how to organize a feature's files. Covers the canonical folder layout (components, hooks, services, types, schemas, constants, utils), what goes where, index export conventions, and how features connect to routes."
+description: "Feature folder structure and architecture for React + TypeScript admin apps. Use this when creating a new feature, adding a major section, or when asked how to organize a feature's files. Covers the canonical folder layout (components, hooks, services, types, schemas, constants, utils), what goes where, and index export conventions."
 ---
 
 # Feature Architecture
 
-## Canonical Folder Layout
+## Core Invariants (always enforced — never violate)
+
+- **Route files NEVER go inside `features/`** — they live exclusively in `src/routes/`. A feature folder contains zero route files.
+- Feature folders contain only: `components/`, `hooks/`, `services/`, `schemas/`, `types/`, `constants/`, `utils/`, `index.ts`.
+- Nothing in `features/` may import from `src/routes/`.
+
+## Project Top-Level Structure
+
+```
+src/
+├── assets/          # Static assets, locale JSON files
+├── core/            # App-level infrastructure (axios, queryClient, router, i18n, contexts)
+├── features/        # Business logic, UI components, hooks, services — one folder per domain
+├── routes/          # ALL route files — file-based routing only, never inside features/
+└── shared/          # Cross-feature shared components, hooks, types, utils
+```
+
+## Canonical Feature Folder Layout
 
 ```
 features/
@@ -29,7 +46,7 @@ features/
     │   ├── useDeleteYourFeature.ts    # Delete mutation
     │   └── index.ts                   # Re-exports all hooks
     ├── schemas/
-    │   └── your-feature.schema.ts     # Zod schemas + formOptions
+    │   └── your-feature.schema.ts     # Zod schemas (search + form) — imported by route files
     ├── services/
     │   ├── your-feature.service.ts    # Axios service object
     │   └── index.ts
@@ -114,13 +131,31 @@ export const yourFeatureService = {
 ```
 
 ### `hooks/` — one file per operation
-Thin wrappers around TanStack Query. See `frontend-tanstack-query` skill for full patterns.
+Thin wrappers around TanStack Query. See `tanstack-query` skill for full patterns.
 
 ### `schemas/your-feature.schema.ts`
-Zod schemas used for both route search validation and form validation. Functions that accept `t: TFunction` for translated error messages. See `frontend-tanstack-form` skill.
+Zod schemas for both search params and form validation. Search schemas are imported by route files. Form schemas use factory functions that accept `t: TFunction`. See `tanstack-form` and `tanstack-router` skills.
+
+```ts
+import { fallback } from '@tanstack/zod-adapter'
+
+// Search schema — imported by route file for validateSearch
+export const yourFeatureSearchSchema = z.object({
+  page: fallback(z.number(), 1).default(1),
+  page_size: fallback(z.number(), 20).default(20),
+  search: z.string().optional(),
+})
+export type YourFeatureSearch = z.infer<typeof yourFeatureSearchSchema>
+
+// Form schema — factory because it needs translated error messages
+export const getYourFeatureSchema = (t: TFunction) => z.object({
+  name: z.string().min(1, t('validation.required')),
+})
+export type YourFeatureFormData = z.infer<ReturnType<typeof getYourFeatureSchema>>
+```
 
 ### `components/index.ts`
-Named re-exports only — makes imports clean from route files.
+Named re-exports only — keeps route file imports clean.
 
 ```ts
 export { YourFeatureList } from './YourFeatureList'
@@ -137,15 +172,23 @@ export * from './hooks'
 export * from './types'
 ```
 
-## Connecting to Routes
+## Route Files — Where They Live
 
-Route files live in `src/routes/_layout/your-section/your-feature/`:
-- `index.tsx` — list page (imports `YourFeatureList`, `YourFeatureFilters`, query hook)
-- `create.tsx` — create form page
-- `$featureId/index.tsx` — detail page (uses loader to prefetch)
-- `$featureId/edit.tsx` — edit form page
+Route files are **not part of the feature folder**. They live in `src/routes/` following the URL structure:
 
-Routes are thin: they handle URL params/search, call hooks, and render feature components. Business logic stays in the feature folder.
+```
+src/routes/
+└── _layout/
+    └── your-section/
+        └── your-feature/
+            ├── index.tsx          # list page
+            ├── create.tsx         # create page
+            └── $featureId/
+                ├── index.tsx      # detail page
+                └── edit.tsx       # edit page
+```
+
+Route files are thin — they only wire URL params/search to feature components. See `tanstack-router` skill for the full route file pattern.
 
 ## Form Sections Pattern
 

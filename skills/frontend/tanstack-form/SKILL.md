@@ -7,6 +7,12 @@ description: "How to build forms using TanStack Form v1 with the shared useAppFo
 
 The project uses TanStack Form v1 with a shared `useAppForm` hook that pre-binds all form components. Always use this hook rather than raw `useForm`.
 
+## Core Invariants (always enforced — never violate)
+
+- Always use `useAppForm`, don't use `useApp`.
+- Every form's DOM scope is `<form.AppForm>` wrapping a `<form>` element with `onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}` (the existing `<Box component="form">` examples already satisfy this — no code changes needed there, this just makes the structural rule explicit).
+- Always render the submit action via `<form.SubmitButton>` — never a raw MUI `<Button type="submit">`.
+
 ## References
 
 Read the relevant file when you need it:
@@ -63,14 +69,15 @@ export function FeatureForm() {
 
         <form.SubmitButton
           label={t('common.save')}
-          loadingLabel={t('common.saving')}
-          isLoading={mutation.isPending}
+          loading={mutation.isPending}
         />
       </Box>
     </form.AppForm>
   )
 }
 ```
+
+`form.SubmitButton` renders MUI's native `loading` prop under the hood — this shows a `CircularProgress` spinner and auto-disables the button; no separate `loadingLabel` text-swap is needed.
 
 ---
 
@@ -219,8 +226,7 @@ const form = useAppForm({
     </Button>
     <form.SubmitButton
       label={t('common.save')}
-      loadingLabel={t('common.saving')}
-      isLoading={mutation.isPending}
+      loading={mutation.isPending}
     />
   </Stack>
 </Box>

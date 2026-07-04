@@ -5,6 +5,28 @@ description: "Core frontend coding standards for React + TypeScript projects usi
 
 # Frontend Coding Standards
 
+## Core Invariants (always enforced — never violate)
+
+- Always use `useTranslation()` for user-visible strings — never hardcode them.
+- Use named exports, not default exports, for everything except route components.
+- **Route files live only in `src/routes/`** — never create route files inside `features/`.
+- **Use `bun` for all package installation** — never `npm`, `yarn`, or `pnpm`.
+- **Use MUI Grid `size` prop for column sizing** — never `xs`/`sm`/`md`/`lg`/`xl` props directly on Grid.
+
+## Package Manager
+
+This project uses **bun** exclusively. Always use `bun` for all package operations:
+
+```bash
+bun add <package>          # install a dependency
+bun add -d <package>       # install a dev dependency
+bun install                # install all dependencies from lockfile
+bun run <script>           # run a package.json script
+bunx <cli>                 # run a package binary without installing globally
+```
+
+Never use `npm`, `yarn`, or `pnpm`.
+
 ## Tech Stack
 
 | Concern | Library |
@@ -21,8 +43,8 @@ description: "Core frontend coding standards for React + TypeScript projects usi
 | Date | Day.js (via MUI `LocalizationProvider` with `AdapterDayjs`) |
 
 > **MUI v9 requires both `@emotion/react` and `@emotion/styled` as peer dependencies.** Always install them together:
-> ```
-> @mui/material @emotion/react @emotion/styled
+> ```bash
+> bun add @mui/material @emotion/react @emotion/styled
 > ```
 
 ## TypeScript
@@ -41,7 +63,7 @@ description: "Core frontend coding standards for React + TypeScript projects usi
 - **Types**: PascalCase (`Electricity`, `ElectricityFilterParams`)
 - **Constants**: SCREAMING_SNAKE_CASE for values, PascalCase for option arrays (`ELECTRICITY_ENDPOINTS`, `USER_USING_TYPES`)
 - **Files**: kebab-case (`electricity.service.ts`, `useElectricities.ts`)
-- **Route files**: kebab-case directories, `index.tsx` for list pages, `$paramId/index.tsx` for detail, `$paramId/edit.tsx` for edit
+- **Route files**: live in `src/routes/_layout/section/feature/` only — kebab-case directories, `index.tsx` for list, `create.tsx` for create, `$paramId/index.tsx` for detail, `$paramId/edit.tsx` for edit
 
 ## Imports
 
@@ -106,9 +128,36 @@ interface ElectricityListProps {
 
 - Use `sx` prop for one-off styles; avoid inline `style`.
 - Prefer MUI responsive breakpoints: `{ xs: ..., sm: ..., md: ... }`.
-- Use MUI `Grid` with `size={{ xs: 12, md: 6 }}` (v9 unified Grid — no separate Grid2 import needed).
 - Use `elevation={0}` with `border` on Cards for flat design.
 - Use `Container maxWidth="xl"` for page-level containers.
+
+### MUI Grid
+
+**MUI v9: `Grid2` is deprecated and removed.** It has been merged into `Grid`. Always import `Grid` from `@mui/material`.
+
+**MUI Grid must use the `size` prop.** Never put breakpoint props directly on `<Grid>` (`xs`, `sm`, `md`, `lg`, `xl`). Never use the legacy `item` prop. Never import or use `Grid2`.
+
+Import from `@mui/material` — MUI v9 unified Grid, no separate `Grid2` import:
+
+```tsx
+import { Grid } from '@mui/material'
+```
+
+| Wrong | Correct |
+|---|---|
+| `<Grid xs={12} md={6}>` | `<Grid size={{ xs: 12, md: 6 }}>` |
+| `<Grid item xs={12} md={6}>` | `<Grid size={{ xs: 12, md: 6 }}>` |
+| `import Grid2 from '@mui/material/Grid2'` | `import { Grid } from '@mui/material'` |
+| `<Grid md={10}>` | `<Grid size={{ md: 10 }}>` or `<Grid size={10}>` |
+
+Container rows stay unchanged:
+
+```tsx
+<Grid container spacing={3}>
+  <Grid size={{ xs: 12, md: 6 }}>...</Grid>
+  <Grid size={12}>...</Grid>
+</Grid>
+```
 
 ## Shared Components
 

@@ -32,7 +32,7 @@ export function FeatureForm() {
         noValidate
       >
         {/* fields */}
-        <form.SubmitButton label={t('common.save')} loadingLabel={t('common.saving')} isLoading={mutation.isPending} />
+        <form.SubmitButton label={t('common.save')} loading={mutation.isPending} />
       </Box>
     </form.AppForm>
   )

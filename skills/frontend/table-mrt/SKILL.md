@@ -7,6 +7,10 @@ description: "How to build data tables using the DataTable component (Material R
 
 The project wraps Material React Table in a shared `DataTable` component at `@/shared/components/DataTable`. Always use this wrapper — don't instantiate `MaterialReactTable` directly.
 
+## Core Invariants (always enforced — never violate)
+
+- Always use the shared `DataTable` wrapper — never instantiate `MaterialReactTable` directly.
+
 ## Import
 
 ```tsx

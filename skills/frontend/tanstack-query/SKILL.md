@@ -5,6 +5,10 @@ description: "How to use TanStack Query v5 for data fetching, mutations, and cac
 
 # Data Fetching with TanStack Query
 
+## Core Invariants (always enforced — never violate)
+
+- Always define query keys as a factory object in the feature's constants file — never inline ad-hoc array keys.
+
 ## Query Client Config
 
 The global `QueryClient` is configured in `@/core/config/query-client.config`:

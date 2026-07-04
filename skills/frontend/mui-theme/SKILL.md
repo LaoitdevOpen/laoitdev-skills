@@ -172,6 +172,10 @@ Labels render as `caption` variant, uppercase, `text.secondary`. Values render a
 </Paper>
 ```
 
+### MUI Grid
+
+Grid items must use the `size` prop — never legacy `xs`/`md` props or the `item` prop. See `react-standard` for the full rule.
+
 ### Card Grid for Detail Sections
 ```tsx
 <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
